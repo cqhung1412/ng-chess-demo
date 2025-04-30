@@ -11,6 +11,9 @@ import { ChessMessageService } from '../../services/chess-message.service';
 })
 export class OfflineGameComponent implements AfterViewInit {
   title = 'Offline Chess Game';
+  isWhiteTurn = true;
+  moveCount = 0;
+  private lastProcessedMove: string | null = null;
 
   @ViewChildren('iframeBox') iframes!: QueryList<ElementRef<HTMLIFrameElement>>;
 
@@ -20,6 +23,12 @@ export class OfflineGameComponent implements AfterViewInit {
     window.addEventListener('message', (event) => {
       if (ChessMessageService.isChessMoveMessage(event)) {
         this.ngZone.run(() => {
+          // Prevent processing the same move twice
+          if (this.lastProcessedMove === event.data.move) {
+            return;
+          }
+          this.lastProcessedMove = event.data.move;
+
           const iframeArray = this.iframes.toArray();
           const sourceIndex = iframeArray.findIndex(
             iframe => iframe.nativeElement.contentWindow === event.source
@@ -32,6 +41,9 @@ export class OfflineGameComponent implements AfterViewInit {
               targetIframe.nativeElement.contentWindow!,
               event.data.move
             );
+            // Update turn based on move count
+            this.moveCount++;
+            this.isWhiteTurn = this.moveCount % 2 === 0;
           }
         });
       }
