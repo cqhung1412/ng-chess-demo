@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './offline-game.component.html',
-  styleUrl: './offline-game.component.scss'
+  styleUrls: ['./offline-game.component.scss']
 })
 export class OfflineGameComponent {
   title = 'Offline Chess Game';

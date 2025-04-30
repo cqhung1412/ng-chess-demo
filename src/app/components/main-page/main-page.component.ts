@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './main-page.component.html',
-  styleUrl: './main-page.component.scss'
+  styleUrls: ['./main-page.component.scss']
 })
 export class MainPageComponent {
   title = 'Chess Game';
