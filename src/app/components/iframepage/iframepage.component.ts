@@ -4,8 +4,9 @@
  * This component is used as the content for the /iframepage route. It renders a simple chess board using ngx-chess-board.
  * Intended to be loaded inside iframes for the offline game page.
  */
-import { Component, ViewChild, ElementRef, NgZone, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, NgZone, AfterViewInit, OnInit } from '@angular/core';
 import { NgxChessBoardModule, NgxChessBoardView } from 'ngx-chess-board';
+import { ChessMessageService } from '../../services/chess-message.service';
 
 @Component({
   selector: 'app-iframepage',
@@ -14,7 +15,7 @@ import { NgxChessBoardModule, NgxChessBoardView } from 'ngx-chess-board';
   templateUrl: './iframepage.component.html',
   styleUrls: ['./iframepage.component.scss']
 })
-export class IframePageComponent implements AfterViewInit {
+export class IframePageComponent implements AfterViewInit, OnInit {
   @ViewChild('board', { static: false }) board!: NgxChessBoardView;
   private shouldRotate = false;
 
@@ -26,9 +27,7 @@ export class IframePageComponent implements AfterViewInit {
 
   ngOnInit() {
     window.addEventListener('message', (event) => {
-      // Only accept messages from the same origin
-      if (event.origin !== window.origin) return;
-      if (event.data && event.data.type === 'move' && event.data.move) {
+      if (ChessMessageService.isChessMoveMessage(event)) {
         this.ngZone.run(() => {
           this.board.move(event.data.move);
         });
@@ -43,7 +42,6 @@ export class IframePageComponent implements AfterViewInit {
   }
 
   onMove(event: any) {
-    // event.move is like 'e2e4'
-    window.parent.postMessage({ type: 'move', move: event.move }, window.origin);
+    ChessMessageService.sendMove(window.parent, event.move);
   }
 } 
