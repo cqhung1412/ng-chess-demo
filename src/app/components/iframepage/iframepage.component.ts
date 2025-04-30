@@ -43,5 +43,20 @@ export class IframePageComponent implements AfterViewInit, OnInit {
 
   onMove(event: any) {
     ChessMessageService.sendMove(window.parent, event.move);
+    
+    // Log move history for debugging
+    const history = this.board.getMoveHistory();
+    // console.log('Move history:', history);
+
+    // Check for checkmate using the last move
+    const lastMove = history[history.length - 1];
+    if (lastMove && lastMove.mate) {
+      const winner = lastMove.color === 'white' ? 'White' : 'Black';
+      window.parent.postMessage({
+        type: 'gameEnd',
+        winner,
+        message: `Checkmate! ${winner} wins!`
+      }, window.origin);
+    }
   }
 } 

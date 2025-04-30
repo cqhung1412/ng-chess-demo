@@ -8,4 +8,11 @@
     <iframe #iframeBox class="iframe-box iframe-1" [class.active]="isWhiteTurn" [class.inactive]="!isWhiteTurn" src="/iframepage" title="Iframe 1"></iframe>
     <iframe #iframeBox class="iframe-box iframe-2" [class.active]="!isWhiteTurn" [class.inactive]="isWhiteTurn" src="/iframepage?rotated=true" title="Iframe 2"></iframe>
   </div>
+
+  <div *ngIf="gameEnded" class="game-end-overlay">
+    <div class="game-end-alert">
+      <h2>{{ gameEndMessage }}</h2>
+      <button (click)="resetGame()" class="new-game-button">Create New Game</button>
+    </div>
+  </div>
 </div>

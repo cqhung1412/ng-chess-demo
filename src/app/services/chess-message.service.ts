@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChessMoveMessage } from '../models/chess-message.model';
+import { ChessMoveMessage, ChessGameEndMessage } from '../models/chess-message.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChessMessageService {
@@ -10,6 +10,14 @@ export class ChessMessageService {
       event.data &&
       event.data.type === 'move' &&
       typeof event.data.move === 'string';
+  }
+
+  static isChessGameEndMessage(event: MessageEvent): event is MessageEvent<ChessGameEndMessage> {
+    return event.origin === ChessMessageService.ORIGIN &&
+      event.data &&
+      event.data.type === 'gameEnd' &&
+      typeof event.data.winner === 'string' &&
+      typeof event.data.message === 'string';
   }
 
   static sendMove(target: Window, move: string) {
