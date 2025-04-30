@@ -1,0 +1,41 @@
+.offline-game {
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #f5f5f5;
+
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    .back-button {
+      padding: 0.5rem 1rem;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #357abd;
+      }
+    }
+
+    h1 {
+      margin: 0;
+      color: #333;
+    }
+  }
+
+  .chess-board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
