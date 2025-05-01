@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: '', redirectTo: '/mainpage', pathMatch: 'full' },
   { path: 'mainpage', component: MainPageComponent },
   { path: 'offline', component: OfflineGameComponent },
+  { path: 'online', component: OnlineGameComponent },
   { path: 'online/:gameCode', component: OnlineGameComponent },
   { path: 'iframepage', component: IframePageComponent }
 ];
