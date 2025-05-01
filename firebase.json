@@ -1,13 +1,17 @@
 {
   "hosting": {
-    "source": ".",
+    "target": "ng-chess-demo",
+    "public": "dist/ng-chess-demo",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "frameworksBackend": {
-      "region": "asia-east1"
-    }
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }
