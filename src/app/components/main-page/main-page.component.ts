@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { MaterialModule } from '../../material.module';
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterModule, MaterialModule],
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss']
 })

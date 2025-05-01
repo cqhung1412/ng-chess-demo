@@ -1,11 +1,19 @@
 <div class="main-page">
-  <h1>{{ title }}</h1>
-  <div class="game-modes">
-    <button routerLink="/offline" class="game-mode-button">
-      Play Offline
-    </button>
-    <button class="game-mode-button" disabled>
-      Play Online (Coming Soon)
-    </button>
-  </div>
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>{{ title }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="game-modes">
+        <button mat-raised-button color="primary" routerLink="/offline" class="game-mode-button">
+          <mat-icon>sports_esports</mat-icon>
+          Play Offline
+        </button>
+        <button mat-raised-button color="accent" disabled class="game-mode-button">
+          <mat-icon>cloud</mat-icon>
+          Play Online (Coming Soon)
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

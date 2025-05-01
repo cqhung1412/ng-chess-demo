@@ -19,3 +19,9 @@ $my-theme: mat.define-light-theme((
 ));
 
 @include mat.all-component-themes($my-theme);
+
+// Remove default margin from body
+body {
+  margin: 0;
+  padding: 0;
+}

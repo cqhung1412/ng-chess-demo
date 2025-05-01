@@ -1,8 +1,10 @@
 <div class="offline-game">
-  <div class="game-header">
-    <button routerLink="/mainpage" class="back-button">← Back to Main Menu</button>
-    <h1>{{ title }}</h1>
-  </div>
+  <mat-toolbar color="primary" class="game-header">
+    <button mat-icon-button routerLink="/mainpage" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">{{ title }}</span>
+  </mat-toolbar>
   
   <div class="iframe-container">
     <iframe #iframeBox class="iframe-box iframe-1" [class.active]="isWhiteTurn" [class.inactive]="!isWhiteTurn" src="/iframepage" title="Iframe 1"></iframe>
@@ -12,9 +14,16 @@
   <app-continue-game-dialog *ngIf="showContinueDialog"></app-continue-game-dialog>
 
   <div *ngIf="gameEnded" class="game-end-overlay">
-    <div class="game-end-alert">
-      <h2>{{ gameEndMessage }}</h2>
-      <button (click)="resetGame()" class="new-game-button">Create New Game</button>
-    </div>
+    <mat-card class="game-end-card">
+      <mat-card-header>
+        <mat-card-title>{{ gameEndMessage }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
+          <mat-icon>refresh</mat-icon>
+          Create New Game
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
 </div>

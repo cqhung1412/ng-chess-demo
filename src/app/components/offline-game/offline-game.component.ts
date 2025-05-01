@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { ChessMessageService } from '../../services/chess-message.service';
 import { GameStateService } from '../../services/game-state.service';
 import { ContinueGameDialogComponent } from '../continue-game-dialog/continue-game-dialog.component';
+import { MaterialModule } from '../../material.module';
 
 @Component({
   selector: 'app-offline-game',
   standalone: true,
-  imports: [CommonModule, RouterLink, ContinueGameDialogComponent],
+  imports: [CommonModule, RouterLink, ContinueGameDialogComponent, MaterialModule],
   templateUrl: './offline-game.component.html',
   styleUrls: ['./offline-game.component.scss']
 })
