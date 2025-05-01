@@ -6,9 +6,15 @@
     <span class="toolbar-title">{{ title }}</span>
   </mat-toolbar>
   
-  <div class="iframe-container">
+  <!-- Desktop boards -->
+  <div class="iframe-container desktop-only">
     <iframe #iframeBox class="iframe-box iframe-1" [class.active]="isWhiteTurn" [class.inactive]="!isWhiteTurn" src="/iframepage" title="Iframe 1"></iframe>
     <iframe #iframeBox class="iframe-box iframe-2" [class.active]="!isWhiteTurn" [class.inactive]="isWhiteTurn" src="/iframepage?rotated=true" title="Iframe 2"></iframe>
+  </div>
+
+  <!-- Mobile board -->
+  <div class="iframe-container mobile-only">
+    <iframe #mobileBoard class="iframe-box iframe-mobile" src="/iframepage?mobile=true" title="Mobile Chess Board"></iframe>
   </div>
 
   <app-continue-game-dialog *ngIf="showContinueDialog"></app-continue-game-dialog>
