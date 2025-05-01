@@ -9,6 +9,8 @@
     <iframe #iframeBox class="iframe-box iframe-2" [class.active]="!isWhiteTurn" [class.inactive]="isWhiteTurn" src="/iframepage?rotated=true" title="Iframe 2"></iframe>
   </div>
 
+  <app-continue-game-dialog *ngIf="showContinueDialog"></app-continue-game-dialog>
+
   <div *ngIf="gameEnded" class="game-end-overlay">
     <div class="game-end-alert">
       <h2>{{ gameEndMessage }}</h2>

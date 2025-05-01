@@ -7,6 +7,7 @@
 import { Component, ViewChild, NgZone, AfterViewInit, OnInit } from '@angular/core';
 import { NgxChessBoardModule, NgxChessBoardView } from 'ngx-chess-board';
 import { ChessMessageService } from '../../services/chess-message.service';
+import { GameStateService } from '../../services/game-state.service';
 
 @Component({
   selector: 'app-iframepage',
@@ -19,7 +20,10 @@ export class IframePageComponent implements AfterViewInit, OnInit {
   @ViewChild('board', { static: false }) board!: NgxChessBoardView;
   private shouldRotate = false;
 
-  constructor(private ngZone: NgZone) {
+  constructor(
+    private ngZone: NgZone,
+    private gameStateService: GameStateService
+  ) {
     // Check for ?rotated=true in the URL
     const params = new URLSearchParams(window.location.search);
     this.shouldRotate = params.get('rotated') === 'true';
@@ -38,6 +42,15 @@ export class IframePageComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     if (this.shouldRotate) {
       setTimeout(() => this.board.reverse(), 0);
+    }
+
+    // Load and apply saved game state
+    const savedState = this.gameStateService.loadGameState();
+    if (savedState && savedState.moveHistory.length > 0) {
+      // Apply all moves from the history
+      savedState.moveHistory.forEach(move => {
+        this.board.move(move);
+      });
     }
   }
 
