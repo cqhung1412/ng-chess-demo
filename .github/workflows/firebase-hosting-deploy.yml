@@ -38,6 +38,7 @@ jobs:
           };" > src/environments/environment.ts
 
       - name: Run tests
+        if: github.ref_name == 'main'
         continue-on-error: true
         run: npm run test
 

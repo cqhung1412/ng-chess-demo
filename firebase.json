@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "ng-chess-demo",
     "public": "dist/ng-chess-demo",
     "ignore": [
       "firebase.json",
