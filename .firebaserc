@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "ng-chess-demo"
-  }
+  },
+  "targets": {
+    "ng-chess-demo": {
+      "hosting": {
+        "ng-chess-demo": [
+          "ng-chess-demo"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
