@@ -35,7 +35,7 @@ jobs:
               measurementId: '${{ secrets.FIREBASE_MEASUREMENT_ID }}',
               databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}'
             }
-          };" > src/environments/environment.prod.ts
+          };" > src/environments/environment.ts
 
       - name: Run tests
         continue-on-error: true
