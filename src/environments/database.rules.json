@@ -1,0 +1,28 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "games": {
+      "$gameId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['board', 'currentPlayer', 'status'])",
+        "board": {
+          ".validate": "newData.isString()"
+        },
+        "currentPlayer": {
+          ".validate": "newData.isString() && (newData.val() === 'white' || newData.val() === 'black')"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'finished')"
+        },
+        "whitePlayer": {
+          ".validate": "newData.isString()"
+        },
+        "blackPlayer": {
+          ".validate": "newData.isString()"
+        }
+      }
+    }
+  }
+} 

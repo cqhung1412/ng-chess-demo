@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Offline chess game component of the Angular Chess Demo.
+ * Handles local two-player chess gameplay with state persistence.
+ */
+
 import { Component, AfterViewInit, ViewChildren, QueryList, ElementRef, NgZone, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,6 +11,23 @@ import { GameStateService } from '../../services/game-state.service';
 import { ContinueGameDialogComponent } from '../continue-game-dialog/continue-game-dialog.component';
 import { MaterialModule } from '../../material.module';
 
+/**
+ * @description
+ * The offline game component that manages local two-player chess gameplay.
+ * 
+ * This component:
+ * - Implements game state management
+ * - Handles move synchronization between players
+ * - Provides game persistence functionality
+ * - Manages game end conditions
+ * 
+ * @Component decorator configures the component with:
+ * - selector: 'app-offline-game' for component identification
+ * - standalone: true for standalone component configuration
+ * - imports: Required modules and components
+ * - templateUrl: Reference to the HTML template
+ * - styleUrls: Reference to the SCSS styles
+ */
 @Component({
   selector: 'app-offline-game',
   standalone: true,
@@ -14,15 +36,31 @@ import { MaterialModule } from '../../material.module';
   styleUrls: ['./offline-game.component.scss']
 })
 export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
+  /** @description The title of the offline game page */
   title = 'Offline Chess Game';
+  
+  /** @description Indicates if it's white's turn to move */
   isWhiteTurn = true;
+  
+  /** @description Count of moves made in the current game */
   moveCount = 0;
+  
+  /** @description The last processed move to prevent duplicate processing */
   private lastProcessedMove: string | null = null;
+  
+  /** @description Flag indicating if the game has ended */
   gameEnded = false;
+  
+  /** @description Message to display when the game ends */
   gameEndMessage = '';
+  
+  /** @description History of moves made in the current game */
   private moveHistory: string[] = [];
+  
+  /** @description Flag to control the display of the continue game dialog */
   showContinueDialog = false;
 
+  /** @description Query for accessing the iframe elements in the template */
   @ViewChildren('iframeBox') iframes!: QueryList<ElementRef<HTMLIFrameElement>>;
 
   constructor(
@@ -30,6 +68,11 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     private gameStateService: GameStateService
   ) {}
 
+  /**
+   * @description
+   * Initializes the component and checks for saved game state.
+   * Shows the continue game dialog if a saved game exists.
+   */
   ngOnInit() {
     const savedState = this.gameStateService.loadGameState();
     if (savedState) {
@@ -38,10 +81,19 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
+  /**
+   * @description
+   * Cleans up event listeners when the component is destroyed.
+   */
   ngOnDestroy() {
     window.removeEventListener('continueGameChoice', this.handleContinueChoice);
   }
 
+  /**
+   * @description
+   * Handles the user's choice to continue or start a new game.
+   * @param {Event} event - The continue game choice event
+   */
   private handleContinueChoice = (event: Event) => {
     const customEvent = event as CustomEvent;
     this.ngZone.run(() => {
@@ -63,6 +115,10 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   };
 
+  /**
+   * @description
+   * Resets the game state to its initial values.
+   */
   private resetGameState() {
     this.moveCount = 0;
     this.isWhiteTurn = true;
@@ -71,6 +127,10 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     this.gameStateService.clearGameState();
   }
 
+  /**
+   * @description
+   * Reloads all iframe elements to reset the chess board.
+   */
   private reloadIframes() {
     const iframeArray = this.iframes.toArray();
     iframeArray.forEach(iframe => {
@@ -78,6 +138,11 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
+  /**
+   * @description
+   * Sets up message event listeners after the view is initialized.
+   * Handles move synchronization and game end conditions.
+   */
   ngAfterViewInit() {
     window.addEventListener('message', (event) => {
       if (ChessMessageService.isChessMoveMessage(event)) {
@@ -120,6 +185,10 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     });
   }
 
+  /**
+   * @description
+   * Saves the current game state to persistent storage.
+   */
   private saveGameState() {
     const gameState = {
       moveCount: this.moveCount,
@@ -130,6 +199,10 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     this.gameStateService.saveGameState(gameState);
   }
 
+  /**
+   * @description
+   * Resets the game to its initial state.
+   */
   resetGame() {
     this.gameEnded = false;
     this.gameEndMessage = '';
