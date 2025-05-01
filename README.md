@@ -1,80 +1,185 @@
-# NgChessDemo
+# Angular Chess Demo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.9.
+A modern web-based chess application built with Angular 16, featuring both local and online multiplayer capabilities. This project demonstrates the integration of Angular with Firebase for real-time game functionality.
 
-## Environment Configuration
+## Features
 
-Before running the application, you need to set up your Firebase configuration:
+- 🎮 Local chess gameplay
+- 🌐 Online multiplayer support
+- 🔥 Real-time game synchronization using Firebase
+- 🎨 Modern UI with Angular Material
+- 📱 Responsive design
+- 🎯 Move validation and game rules enforcement
 
-1. Copy the sample environment file:
-   ```bash
-   cp src/environments/environment.sample.ts src/environments/environment.ts
+## Tech Stack
+
+- **Frontend Framework**: Angular 16
+- **UI Components**: Angular Material
+- **Backend**: Firebase
+- **Chess Engine**: ngx-chess-board
+- **State Management**: Angular Services
+- **Styling**: SCSS
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Node.js (v18 or later)
+- npm (v8 or later)
+- Angular CLI (v16 or later)
+- Firebase CLI (if deploying)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/ng-chess-demo.git
+cd ng-chess-demo
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Configure Firebase:
+   - Create a new Firebase project
+   - Update the Firebase configuration in `src/environments/environment.ts`
+
+## Development
+
+Run the development server:
+```bash
+npm start
+```
+
+The application will be available at `http://localhost:4200/`
+
+## Building for Production
+
+To build the application for production:
+```bash
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory.
+
+## Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+## Firebase Setup and Configuration
+
+### 1. Install Firebase CLI
+```bash
+npm install -g firebase-tools
+```
+
+### 2. Login to Firebase
+```bash
+firebase login
+```
+
+### 3. Initialize Firebase in your project
+```bash
+firebase init
+```
+During initialization, select the following options:
+- Select "Hosting" as the Firebase feature
+- Choose your Firebase project or create a new one
+- Use `dist/ng-chess-demo` as your public directory
+- Configure as a single-page app: Yes
+- Set up automatic builds and deploys with GitHub: No (unless you want to)
+- Overwrite index.html: No
+
+### 4. Configure Firebase Environment
+1. Create a new Firebase project in the [Firebase Console](https://console.firebase.google.com/)
+2. Enable the following Firebase services:
+   - Authentication
+   - Firebase Realtime Database
+   - Hosting
+
+3. Update your environment files:
+   - Copy `src/environments/environment.sample.ts` to `src/environments/environment.ts`
+   - Update the Firebase configuration in `environment.ts` with your project's credentials:
+   ```typescript
+   export const environment = {
+     production: false,
+     firebase: {
+       apiKey: "your-api-key",
+       authDomain: "your-project-id.firebaseapp.com",
+       projectId: "your-project-id",
+       storageBucket: "your-project-id.appspot.com",
+       messagingSenderId: "your-messaging-sender-id",
+       appId: "your-app-id"
+     }
+   };
+   ```
+   - Repeat the same configuration in `src/environments/environment.prod.ts` for production
+
+### 5. Security Rules Setup
+1. Configure Firestore security rules in the Firebase Console:
+   ```javascript
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /games/{gameId} {
+         allow read, write: if request.auth != null;
+       }
+     }
+   }
    ```
 
-2. Update the Firebase configuration in `src/environments/environment.ts` with your actual Firebase project credentials:
-   - Go to your Firebase Console
-   - Select your project
-   - Click on the gear icon (⚙️) next to "Project Overview"
-   - Select "Project settings"
-   - Scroll down to "Your apps" section
-   - Click on the web app icon (</>)
-   - Register your app if you haven't already
-   - Copy the configuration object and replace the values in `environment.ts`
+2. Configure Authentication settings:
+   - Enable Email/Password authentication in the Firebase Console
+   - Add your domain to the authorized domains list
 
-3. For production builds, also update `src/environments/environment.prod.ts` with the same configuration.
+## Deployment
 
-## Development server
+The application is configured for Firebase hosting. To deploy:
 
-To start a local development server, run:
-
+1. Build the application:
 ```bash
-ng serve
+npm run build
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+2. Deploy to Firebase:
 ```bash
-ng generate component component-name
+firebase deploy
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Project Structure
 
-```bash
-ng generate --help
+```
+src/
+├── app/
+│   ├── components/     # Reusable UI components
+│   ├── features/       # Feature modules
+│   │   ├── game/       # Local game implementation
+│   │   └── online-game/# Online multiplayer implementation
+│   ├── models/         # Data models and interfaces
+│   ├── services/       # Application services
+│   └── app.module.ts   # Root module
+├── environments/       # Environment configurations
+└── styles.scss        # Global styles
 ```
 
-## Building
+## Contributing
 
-To build the project run:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```bash
-ng build
-```
+## License
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Running unit tests
+## Acknowledgments
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [ngx-chess-board](https://github.com/loloof64/ngx-chess-board) for the chess board implementation
+- [Angular](https://angular.io/) for the framework
+- [Firebase](https://firebase.google.com/) for the backend services

@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Online chess game component of the Angular Chess Demo.
+ * Handles real-time multiplayer chess gameplay using Firebase.
+ */
+
 import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { MaterialModule } from '../../material.module';
@@ -14,6 +19,23 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { getDatabase, ref as dbRef, get as dbGet } from '@angular/fire/database';
 
+/**
+ * @description
+ * The online game component that manages real-time multiplayer chess gameplay.
+ * 
+ * This component:
+ * - Handles game creation and joining
+ * - Manages real-time game state synchronization
+ * - Implements move validation and turn management
+ * - Provides player interaction with the chess board
+ * 
+ * @Component decorator configures the component with:
+ * - selector: 'app-online-game' for component identification
+ * - standalone: true for standalone component configuration
+ * - imports: Required modules and components
+ * - templateUrl: Reference to the HTML template
+ * - styleUrls: Reference to the SCSS styles
+ */
 @Component({
   selector: 'app-online-game',
   standalone: true,
@@ -33,13 +55,28 @@ import { getDatabase, ref as dbRef, get as dbGet } from '@angular/fire/database'
   styleUrls: ['./online-game.component.scss']
 })
 export class OnlineGameComponent implements OnInit, OnDestroy {
+  /** @description Reference to the chess board component */
   @ViewChild('board') board!: NgxChessBoardView;
+  
+  /** @description Subscription to game state updates */
   private gameSubscription: Subscription | null = null;
+  
+  /** @description Current state of the game */
   currentGameState: GameState | null = null;
+  
+  /** @description Indicates if the current player is playing as white */
   isWhitePlayer: boolean = false;
+  
+  /** @description Unique code identifying the current game */
   gameCode: string | null = null;
+  
+  /** @description Subscription to route parameter changes */
   private routeSubscription: Subscription | null = null;
+  
+  /** @description Title of the online game page */
   title = 'Online Chess Game';
+  
+  /** @description Flag indicating if a new game is being created */
   isCreatingGame = false;
 
   constructor(
@@ -48,12 +85,20 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  /**
+   * @description
+   * Initializes the component and subscribes to route parameters.
+   */
   ngOnInit(): void {
     this.routeSubscription = this.route.params.subscribe(params => {
       this.gameCode = params['gameCode'] || null;
     });
   }
 
+  /**
+   * @description
+   * Cleans up subscriptions and resources when the component is destroyed.
+   */
   ngOnDestroy(): void {
     if (this.gameSubscription) {
       this.gameSubscription.unsubscribe();
@@ -64,6 +109,11 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.onlineGameService.cleanup();
   }
 
+  /**
+   * @description
+   * Creates a new online game with the specified player name.
+   * @param {string} playerName - The name of the player creating the game
+   */
   async createNewGame(playerName: string) {
     console.log('Creating new game with player name:', playerName);
     if (!playerName) {
@@ -94,6 +144,12 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * @description
+   * Joins an existing game with the specified game code and player name.
+   * @param {string} gameCode - The unique code of the game to join
+   * @param {string} playerName - The name of the player joining the game
+   */
   async joinGame(gameCode: string, playerName: string) {
     console.log('Joining game:', gameCode, 'with player name:', playerName);
     if (!gameCode || !playerName) {
@@ -115,6 +171,10 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * @description
+   * Sets up a subscription to listen for game state updates.
+   */
   private listenToGame() {
     if (!this.gameCode) {
       console.log('No game code available to listen to');
@@ -142,6 +202,11 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * @description
+   * Handles a move made by the player on the chess board.
+   * @param {any} move - The move object containing move details
+   */
   onMove(move: any) {
     if (!this.currentGameState || !this.gameCode) {
       console.log('Cannot make move: no game state or game code');
@@ -175,10 +240,20 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.onlineGameService.makeMove(this.gameCode, gameMove, newFEN);
   }
 
+  /**
+   * @description
+   * Checks if the game is waiting for an opponent to join.
+   * @returns {boolean} True if waiting for an opponent, false otherwise
+   */
   get waitingForOpponent(): boolean {
     return !!this.currentGameState && !this.currentGameState.players.black;
   }
 
+  /**
+   * @description
+   * Checks if the game is waiting for the opponent's move.
+   * @returns {boolean} True if waiting for opponent's move, false otherwise
+   */
   get waitingForOpponentMove(): boolean {
     if (!this.currentGameState) return false;
     const myColor = this.isWhitePlayer ? 'white' : 'black';

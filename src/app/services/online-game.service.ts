@@ -1,18 +1,42 @@
+/**
+ * @fileoverview Service for managing online multiplayer chess games using Firebase Realtime Database.
+ * Handles game creation, joining, move synchronization, and state management.
+ */
+
 import { Injectable } from '@angular/core';
 import { Database, ref, set, get, onValue, push, update, remove, DataSnapshot } from '@angular/fire/database';
 import { BehaviorSubject, Observable, from, map } from 'rxjs';
 import { OnlineGame, GameState, GameMove, GamePlayer, GameStatus, PlayerColor } from '../models/online-game.model';
 
+/**
+ * @description
+ * Service that manages online multiplayer chess games.
+ * 
+ * This service:
+ * - Creates and manages game instances
+ * - Handles player joining and game state synchronization
+ * - Manages move validation and turn switching
+ * - Provides real-time game state updates
+ * 
+ * @Injectable decorator configures the service as a root-level injectable.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class OnlineGameService {
+  /** @description BehaviorSubject for managing the current game state */
   private currentGameState = new BehaviorSubject<GameState | null>(null);
+  
+  /** @description Reference to the current game in Firebase */
   private gameRef: any = null;
 
   constructor(private db: Database) {}
 
-  // Generate a random game code
+  /**
+   * @description
+   * Generates a random 6-character game code.
+   * @returns {string} A randomly generated game code
+   */
   private generateGameCode(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -22,7 +46,12 @@ export class OnlineGameService {
     return result;
   }
 
-  // Create a new game
+  /**
+   * @description
+   * Creates a new online chess game.
+   * @param {string} playerName - The name of the player creating the game
+   * @returns {Promise<string>} A promise that resolves to the game code
+   */
   async createGame(playerName: string): Promise<string> {
     const gameCode = this.generateGameCode();
     const gameId = push(ref(this.db, 'games')).key;
@@ -42,7 +71,13 @@ export class OnlineGameService {
     return gameCode;
   }
 
-  // Join an existing game
+  /**
+   * @description
+   * Joins an existing game with the specified game code.
+   * @param {string} gameCode - The code of the game to join
+   * @param {string} playerName - The name of the player joining the game
+   * @returns {Promise<boolean>} A promise that resolves to true if join was successful
+   */
   async joinGame(gameCode: string, playerName: string): Promise<boolean> {
     const gamesRef = ref(this.db, 'games');
     const snapshot = await get(gamesRef);
@@ -72,7 +107,12 @@ export class OnlineGameService {
     return true;
   }
 
-  // Listen to game state changes
+  /**
+   * @description
+   * Sets up a listener for game state changes.
+   * @param {string} gameCode - The code of the game to listen to
+   * @returns {Observable<GameState | null>} An observable of game state updates
+   */
   listenToGame(gameCode: string): Observable<GameState | null> {
     const gamesRef = ref(this.db, 'games');
     console.log('Setting up onValue listener for /games');
@@ -116,7 +156,14 @@ export class OnlineGameService {
     });
   }
 
-  // Make a move in the game
+  /**
+   * @description
+   * Makes a move in the specified game.
+   * @param {string} gameCode - The code of the game
+   * @param {GameMove} move - The move to make
+   * @param {string} newFEN - The new FEN string representing the board state
+   * @returns {Promise<boolean>} A promise that resolves to true if the move was successful
+   */
   async makeMove(gameCode: string, move: GameMove, newFEN: string): Promise<boolean> {
     const gamesRef = ref(this.db, 'games');
     const snapshot = await get(gamesRef);
@@ -147,12 +194,19 @@ export class OnlineGameService {
     return true;
   }
 
-  // Get current game state
+  /**
+   * @description
+   * Gets the current game state as an observable.
+   * @returns {Observable<GameState | null>} An observable of the current game state
+   */
   getCurrentGameState(): Observable<GameState | null> {
     return this.currentGameState.asObservable();
   }
 
-  // Clean up when leaving the game
+  /**
+   * @description
+   * Cleans up resources when leaving the game.
+   */
   cleanup() {
     if (this.gameRef) {
       // Unsubscribe from any listeners
