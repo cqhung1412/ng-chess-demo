@@ -49,8 +49,15 @@
       <mat-card>
         <mat-card-header>
           <mat-card-title>
-            Game Code: {{ gameCode }}
-            <span class="player-info">(You are playing as {{ isWhitePlayer ? 'White' : 'Black' }})</span>
+            <div class="game-code-container">
+              <span class="game-code-label">Game Code: <span class="game-code-value">{{ gameCode }}</span></span>
+              <button *ngIf="waitingForOpponent" mat-icon-button (click)="copyGameCodeToClipboard()" matTooltip="Copy game code" class="copy-btn">
+                <mat-icon fontIcon="content_copy" style="font-size: 18px;"></mat-icon>
+              </button>
+            </div>
+            <div class="player-info-centered">
+              (You are playing as {{ isWhitePlayer ? 'White' : 'Black' }})
+            </div>
           </mat-card-title>
         </mat-card-header>
         <mat-card-content style="position: relative;">
@@ -68,12 +75,29 @@
               <div class="waiting-message">Waiting for second player to join...</div>
             </div>
             <div *ngIf="waitingForOpponentMove && !waitingForOpponent" class="waiting-overlay">
-              <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
-              <div class="waiting-message">Waiting for opponent's move...</div>
+              <div class="waiting-message">Waiting for opponent's move<span class="dot-animate">{{ animatedDots }}</span></div>
             </div>
           </div>
         </mat-card-content>
       </mat-card>
     </div>
+  </div>
+
+  <div *ngIf="gameEnded" class="game-end-overlay">
+    <mat-card class="game-end-card">
+      <mat-card-header>
+        <mat-card-title>{{ gameEndMessage }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
+          <mat-icon>refresh</mat-icon>
+          Create New Game
+        </button>
+        <button mat-raised-button color="accent" (click)="requestRematch()" class="rematch-button">
+          <mat-icon>replay</mat-icon>
+          Request Rematch
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
 </div>

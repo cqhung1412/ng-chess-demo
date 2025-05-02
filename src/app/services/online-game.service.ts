@@ -214,4 +214,100 @@ export class OnlineGameService {
     }
     this.currentGameState.next(null);
   }
+
+  /**
+   * @description
+   * Ends the game and sets the winner.
+   * @param {string} gameCode - The code of the game
+   * @param {PlayerColor} winner - The color of the winning player
+   */
+  async endGame(gameCode: string, winner: PlayerColor): Promise<void> {
+    const gamesRef = ref(this.db, 'games');
+    const snapshot = await get(gamesRef);
+    const games = snapshot.val() || {};
+
+    const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
+      const gameData = game as OnlineGame;
+      return gameData.gameCode === gameCode;
+    });
+
+    if (!gameEntry) return;
+
+    const [gameId] = gameEntry;
+    const updates: any = {
+      [`games/${gameId}/status`]: 'completed',
+      [`games/${gameId}/winner`]: winner
+    };
+
+    await update(ref(this.db), updates);
+  }
+
+  /**
+   * @description
+   * Requests a rematch for the specified game.
+   * @param {string} gameCode - The code of the game
+   */
+  async requestRematch(gameCode: string): Promise<void> {
+    const gamesRef = ref(this.db, 'games');
+    const snapshot = await get(gamesRef);
+    const games = snapshot.val() || {};
+
+    const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
+      const gameData = game as OnlineGame;
+      return gameData.gameCode === gameCode;
+    });
+
+    if (!gameEntry) return;
+
+    const [gameId] = gameEntry;
+    const updates: any = {
+      [`games/${gameId}/status`]: 'rematch_requested'
+    };
+
+    await update(ref(this.db), updates);
+  }
+
+  /**
+   * @description
+   * Accepts a rematch request and creates a new game.
+   * @param {string} gameCode - The code of the game
+   */
+  async acceptRematch(gameCode: string): Promise<void> {
+    const gamesRef = ref(this.db, 'games');
+    const snapshot = await get(gamesRef);
+    const games = snapshot.val() || {};
+
+    const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
+      const gameData = game as OnlineGame;
+      return gameData.gameCode === gameCode;
+    });
+
+    if (!gameEntry) return;
+
+    const [gameId, game] = gameEntry;
+    const gameData = game as OnlineGame;
+
+    // Create a new game with the same players but swapped colors
+    const newGame: OnlineGame = {
+      id: '',
+      board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      currentPlayer: 'white',
+      status: 'playing',
+      whitePlayer: gameData.blackPlayer,
+      blackPlayer: gameData.whitePlayer,
+      createdAt: Date.now(),
+      lastMoveAt: Date.now(),
+      gameCode: this.generateGameCode()
+    };
+
+    const newGameRef = push(ref(this.db, 'games'));
+    await set(newGameRef, newGame);
+
+    // Update the old game status
+    const updates: any = {
+      [`games/${gameId}/status`]: 'rematch_accepted'
+    };
+
+    await update(ref(this.db), updates);
+  }
 } 

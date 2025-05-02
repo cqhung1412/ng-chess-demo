@@ -1,4 +1,4 @@
-export type GameStatus = 'waiting' | 'playing' | 'finished';
+export type GameStatus = 'waiting' | 'playing' | 'completed' | 'rematch_requested' | 'rematch_accepted';
 export type PlayerColor = 'white' | 'black';
 
 export interface OnlineGame {

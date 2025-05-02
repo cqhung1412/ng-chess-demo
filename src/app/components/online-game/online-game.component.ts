@@ -3,8 +3,8 @@
  * Handles real-time multiplayer chess gameplay using Firebase.
  */
 
-import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef, AfterViewInit, AfterViewChecked } from '@angular/core';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MaterialModule } from '../../material.module';
 import { OnlineGameService } from '../../services/online-game.service';
 import { GameState, GameMove, PlayerColor } from '../../models/online-game.model';
@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { getDatabase, ref as dbRef, get as dbGet } from '@angular/fire/database';
 
@@ -28,6 +28,7 @@ import { getDatabase, ref as dbRef, get as dbGet } from '@angular/fire/database'
  * - Manages real-time game state synchronization
  * - Implements move validation and turn management
  * - Provides player interaction with the chess board
+ * - Allows copying the game code to clipboard while waiting for a second player
  * 
  * @Component decorator configures the component with:
  * - selector: 'app-online-game' for component identification
@@ -54,7 +55,7 @@ import { getDatabase, ref as dbRef, get as dbGet } from '@angular/fire/database'
   templateUrl: './online-game.component.html',
   styleUrls: ['./online-game.component.scss']
 })
-export class OnlineGameComponent implements OnInit, OnDestroy {
+export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
   /** @description Reference to the chess board component */
   @ViewChild('board') board!: NgxChessBoardView;
   
@@ -79,10 +80,30 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
   /** @description Flag indicating if a new game is being created */
   isCreatingGame = false;
 
+  /**
+   * @description Animated dots for waiting message
+   */
+  animatedDots: string = '.';
+  private dotsInterval: any = null;
+
+  /** @description Flag indicating if the game has ended */
+  gameEnded = false;
+
+  /** @description Message to display when the game ends */
+  gameEndMessage = '';
+
+  /** @description Flag indicating if a rematch has been requested */
+  rematchRequested = false;
+
+  /** @description Flag indicating if the opponent has requested a rematch */
+  opponentRematchRequested = false;
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private onlineGameService: OnlineGameService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {}
 
   /**
@@ -93,6 +114,8 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.routeSubscription = this.route.params.subscribe(params => {
       this.gameCode = params['gameCode'] || null;
     });
+    // Watch for waitingForOpponentMove changes
+    this.setupDotsAnimation();
   }
 
   /**
@@ -107,6 +130,15 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       this.routeSubscription.unsubscribe();
     }
     this.onlineGameService.cleanup();
+    this.clearDotsAnimation();
+  }
+
+  ngAfterViewInit(): void {
+    // No-op
+  }
+
+  ngAfterViewChecked(): void {
+    // No-op
   }
 
   /**
@@ -189,11 +221,23 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     this.gameSubscription = this.onlineGameService.listenToGame(this.gameCode)
       .subscribe({
         next: (gameState: GameState | null) => {
-          console.log('Received game state:', gameState);
           this.currentGameState = gameState;
           if (gameState && this.board) {
             this.board.setFEN(gameState.game.board);
+            if (!this.isWhitePlayer) {
+              setTimeout(() => {
+                this.board.reverse();
+              });
+            }
           }
+
+          // Show game over dialog for both players if game is completed
+          if (gameState && gameState.game.status === 'completed') {
+            this.gameEnded = true;
+            const winner = gameState.game.winner === 'white' ? 'White' : 'Black';
+            this.gameEndMessage = `Checkmate! ${winner} wins!`;
+          }
+
           this.cdr.detectChanges();
         },
         error: (error) => {
@@ -237,7 +281,12 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
       timestamp: Date.now()
     };
 
-    this.onlineGameService.makeMove(this.gameCode, gameMove, newFEN);
+    // Only update the backend if not checkmate; checkmate will be handled by backend/game state
+    if (move.mate) {
+      this.onlineGameService.endGame(this.gameCode, move.color);
+    } else {
+      this.onlineGameService.makeMove(this.gameCode, gameMove, newFEN);
+    }
   }
 
   /**
@@ -258,5 +307,81 @@ export class OnlineGameComponent implements OnInit, OnDestroy {
     if (!this.currentGameState) return false;
     const myColor = this.isWhitePlayer ? 'white' : 'black';
     return this.currentGameState.game.currentPlayer !== myColor;
+  }
+
+  /**
+   * @description
+   * Copies the game code to the clipboard and shows a confirmation snackbar.
+   */
+  copyGameCodeToClipboard(): void {
+    if (this.gameCode) {
+      navigator.clipboard.writeText(this.gameCode).then(() => {
+        this.snackBar.open('Game code copied to clipboard!', 'Close', { duration: 2000 });
+      });
+    }
+  }
+
+  /**
+   * @description Sets up the animated dots interval if needed
+   */
+  private setupDotsAnimation(): void {
+    // Use a MutationObserver or polling to check for waitingForOpponentMove changes
+    setInterval(() => {
+      if (this.waitingForOpponentMove && !this.waitingForOpponent) {
+        if (!this.dotsInterval) {
+          this.dotsInterval = setInterval(() => {
+            if (this.animatedDots.length >= 3) {
+              this.animatedDots = '.';
+            } else {
+              this.animatedDots += '.';
+            }
+          }, 500);
+        }
+      } else {
+        this.clearDotsAnimation();
+      }
+    }, 200);
+  }
+
+  /**
+   * @description Clears the animated dots interval
+   */
+  private clearDotsAnimation(): void {
+    if (this.dotsInterval) {
+      clearInterval(this.dotsInterval);
+      this.dotsInterval = null;
+      this.animatedDots = '.';
+    }
+  }
+
+  /**
+   * @description
+   * Resets the game state and creates a new game.
+   */
+  resetGame(): void {
+    this.gameEnded = false;
+    this.gameEndMessage = '';
+    this.rematchRequested = false;
+    this.opponentRematchRequested = false;
+    this.router.navigate(['/online-game']);
+  }
+
+  /**
+   * @description
+   * Requests a rematch from the opponent.
+   */
+  requestRematch(): void {
+    if (!this.gameCode) return;
+    this.rematchRequested = true;
+    this.onlineGameService.requestRematch(this.gameCode);
+  }
+
+  /**
+   * @description
+   * Accepts a rematch request from the opponent.
+   */
+  acceptRematch(): void {
+    if (!this.gameCode) return;
+    this.onlineGameService.acceptRematch(this.gameCode);
   }
 }
