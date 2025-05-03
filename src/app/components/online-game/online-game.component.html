@@ -1,0 +1,127 @@
+<div class="online-game-container">
+  <mat-toolbar color="primary" class="game-header">
+    <button mat-icon-button routerLink="/mainpage" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">{{ title }}</span>
+  </mat-toolbar>
+
+  <div class="game-content">
+    <div *ngIf="!currentGameState" class="game-setup">
+      <mat-card>
+        <mat-card-content>
+          <div class="setup-options">
+            <div class="create-game">
+              <h3>Create New Game</h3>
+              <mat-form-field>
+                <mat-label>Your Name</mat-label>
+                <input matInput #playerNameCreate placeholder="Enter your name">
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="createNewGame(playerNameCreate.value)" [disabled]="isCreatingGame">
+                <span class="button-content">
+                  <mat-progress-spinner *ngIf="isCreatingGame" diameter="20" mode="indeterminate"></mat-progress-spinner>
+                  <span *ngIf="!isCreatingGame">Create Game</span>
+                  <span *ngIf="isCreatingGame" style="margin-left: 8px;">Creating...</span>
+                </span>
+              </button>
+            </div>
+
+            <div class="join-game">
+              <h3>Join Existing Game</h3>
+              <mat-form-field>
+                <mat-label>Game Code</mat-label>
+                <input matInput #gameCode placeholder="Enter game code">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Your Name</mat-label>
+                <input matInput #playerNameJoin placeholder="Enter your name">
+              </mat-form-field>
+              <button mat-raised-button color="accent" (click)="joinGame(gameCode.value, playerNameJoin.value)">
+                Join Game
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div *ngIf="currentGameState" class="game-board">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <div class="game-code-container">
+              <span class="game-code-label">Game Code: <span class="game-code-value">{{ gameCode }}</span></span>
+              <button *ngIf="waitingForOpponent" mat-icon-button (click)="copyGameCodeToClipboard()" matTooltip="Copy game code" class="copy-btn">
+                <mat-icon fontIcon="content_copy" style="font-size: 18px;"></mat-icon>
+              </button>
+            </div>
+            <div class="player-info-centered">
+              (You are playing as {{ isWhitePlayer ? 'White' : 'Black' }})
+            </div>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="position: relative;">
+          <div class="board-wrapper" [class.waiting]="waitingForOpponent || waitingForOpponentMove">
+            <ngx-chess-board
+              #board
+              [size]="400"
+              [freeMode]="false"
+              [lightTileColor]="'#f0d9b5'"
+              [darkTileColor]="'#b58863'"
+              (moveChange)="onMove($event)">
+            </ngx-chess-board>
+            <div *ngIf="waitingForOpponent" class="waiting-overlay">
+              <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+              <div class="waiting-message">Waiting for second player to join...</div>
+            </div>
+            <div *ngIf="waitingForOpponentMove && !waitingForOpponent" class="waiting-overlay">
+              <div class="waiting-message">Waiting for opponent's move<span class="dot-animate">{{ animatedDots }}</span></div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div *ngIf="gameEnded" class="game-end-overlay">
+    <mat-card class="game-end-card">
+      <mat-card-header>
+        <mat-card-title>{{ gameEndMessage }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions>
+        <!-- <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
+          <mat-icon>refresh</mat-icon>
+          Create New Game
+        </button> -->
+        <button *ngIf="!rematchRequested && !opponentRematchRequested" 
+                mat-raised-button color="accent" 
+                (click)="requestRematch()" 
+                class="rematch-button">
+          <mat-icon>replay</mat-icon>
+          Request Rematch
+        </button>
+        <button *ngIf="opponentRematchRequested" 
+                mat-raised-button color="accent" 
+                (click)="acceptRematch()" 
+                class="rematch-button">
+          <mat-icon>replay</mat-icon>
+          Accept Rematch
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div *ngIf="waitingForRematchAcceptance" class="rematch-waiting-overlay">
+    <mat-card class="rematch-waiting-card">
+      <mat-card-header>
+        <mat-card-title>Waiting for opponent to accept rematch</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="waiting-message">
+          <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+          <span>Waiting for opponent to accept rematch<span class="dot-animate">{{ animatedDots }}</span></span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "target": "ng-chess-demo",
+    "public": "dist/ng-chess-demo",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

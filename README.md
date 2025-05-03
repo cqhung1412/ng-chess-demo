@@ -1,59 +1,164 @@
-# NgChessDemo
+# Angular Chess Demo
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.9.
+A modern web-based chess application built with Angular 16, featuring both local and online multiplayer capabilities. This project demonstrates the integration of Angular with Firebase for real-time game functionality.
 
-## Development server
+Demo link: https://ng-chess-demo.web.app
 
-To start a local development server, run:
+## Features
 
+- 🎮 Local chess gameplay
+- 🌐 Online multiplayer support
+- 🔥 Real-time game synchronization using Firebase
+- 🎨 Modern UI with Angular Material
+- 📱 Responsive design
+- 🎯 Move validation and game rules enforcement
+
+## Tech Stack
+
+- **Frontend Framework**: Angular 16
+- **UI Components**: Angular Material
+- **Backend**: Firebase
+- **Chess Engine**: ngx-chess-board
+- **State Management**: Angular Services
+- **Styling**: SCSS
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Node.js (v18 or later)
+- npm (v8 or later)
+- Angular CLI (v16 or later)
+- Firebase CLI (if deploying)
+
+## Installation
+
+1. Fork and clone the repository:
 ```bash
-ng serve
+git clone https://github.com/yourusername/ng-chess-demo.git
+cd ng-chess-demo
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+2. Install dependencies:
 ```bash
-ng generate component component-name
+npm install --legacy-peer-deps
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3. Configure Firebase:
+   - Create a new Firebase project
+   - Update the Firebase configuration in `src/environments/environment.ts`
 
+## Development
+
+Run the development server:
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+The application will be available at `http://localhost:4200/`
 
-To build the project run:
+## Building for Production
 
+To build the application for production:
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+## Testing
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
+Run the test suite:
 ```bash
-ng test
+npm test
 ```
 
-## Running end-to-end tests
+## Firebase Setup and Configuration
 
-For end-to-end (e2e) testing, run:
-
+### 1. Install Firebase CLI
 ```bash
-ng e2e
+npm install -g firebase-tools
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### 2. Login to Firebase
+```bash
+firebase login
+```
 
-## Additional Resources
+### 3. Initialize Firebase in your project
+```bash
+firebase init
+```
+During initialization, select the following options:
+- Select "Hosting" as the Firebase feature
+- Choose your Firebase project or create a new one
+- Use `dist/ng-chess-demo` as your public directory
+- Configure as a single-page app: Yes
+- Set up automatic builds and deploys with GitHub: No (unless you want to)
+- Overwrite index.html: No
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### 4. Configure Firebase Environment
+1. Create a new Firebase project in the [Firebase Console](https://console.firebase.google.com/)
+2. Enable the following Firebase services:
+   - Firebase Realtime Database
+   - Hosting
+
+3. Update your environment files:
+   - Copy `src/environments/environment.sample.ts` to `src/environments/environment.ts`
+   - Update the Firebase configuration in `environment.ts` with your project's credentials:
+   ```typescript
+   export const environment = {
+     production: false,
+     firebase: {
+       apiKey: "your-api-key",
+       authDomain: "your-project-id.firebaseapp.com",
+       projectId: "your-project-id",
+       storageBucket: "your-project-id.appspot.com",
+       messagingSenderId: "your-messaging-sender-id",
+       appId: "your-app-id"
+     }
+   };
+   ```
+
+### 5. Security Rules Setup
+
+Configure Firebase realtime database security rules in the Firebase Console with [this example](./src/environments/database.rules.json)
+
+## Deployment
+
+The application is configured for Firebase hosting. To deploy:
+
+1. Build the application:
+```bash
+npm run build
+```
+
+2. Deploy to Firebase:
+```bash
+firebase deploy
+```
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── components/     # Reusable UI components
+│   ├── features/       # Feature modules
+│   │   ├── game/       # Local game implementation
+│   │   └── online-game/# Online multiplayer implementation
+│   ├── models/         # Data models and interfaces
+│   ├── services/       # Application services
+│   └── app.module.ts   # Root module
+├── environments/       # Environment configurations
+└── styles.scss         # Global styles
+```
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [ngx-chess-board](https://github.com/loloof64/ngx-chess-board) for the chess board implementation
+- [Angular](https://angular.io/) for the framework
+- [Firebase](https://firebase.google.com/) for the backend services

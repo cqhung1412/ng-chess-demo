@@ -1,0 +1,44 @@
+<div class="offline-game">
+  <mat-toolbar color="primary" class="game-header">
+    <button mat-icon-button routerLink="/mainpage" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">{{ title }}</span>
+  </mat-toolbar>
+  
+  <!-- Desktop boards -->
+  <div class="iframe-container desktop-only">
+    <iframe #iframeBox class="iframe-box iframe-1" [class.active]="isWhiteTurn" [class.inactive]="!isWhiteTurn" src="/iframepage" title="Iframe 1"></iframe>
+    <iframe #iframeBox class="iframe-box iframe-2" [class.active]="!isWhiteTurn" [class.inactive]="isWhiteTurn" src="/iframepage?rotated=true" title="Iframe 2"></iframe>
+  </div>
+
+  <!-- Mobile board -->
+  <div class="iframe-container mobile-only">
+    <iframe #mobileBoard class="iframe-box iframe-mobile" src="/iframepage?mobile=true" title="Mobile Chess Board"></iframe>
+  </div>
+
+  <div *ngIf="showContinueDialog" class="dialog-overlay" (click)="onNoClick()">
+    <div class="dialog-content" (click)="$event.stopPropagation()">
+      <h2>Continue Previous Game?</h2>
+      <p>We found a game in progress. Would you like to continue where you left off?</p>
+      <div class="dialog-actions">
+        <button (click)="onNoClick()">Start New Game</button>
+        <button (click)="onYesClick()" class="primary">Continue Game</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="gameEnded" class="game-end-overlay">
+    <mat-card class="game-end-card">
+      <mat-card-header>
+        <mat-card-title>{{ gameEndMessage }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
+          <mat-icon>refresh</mat-icon>
+          Create New Game
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

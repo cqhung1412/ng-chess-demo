@@ -1,0 +1,44 @@
+{
+  "rules": {
+    "games": {
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["gameCode"],
+      "$gameId": {
+        ".read": "(data.hasChild('expiresAt') && now > data.child('expiresAt').val())",
+        ".write": true,
+        ".validate": "newData.hasChildren(['board', 'gameCode', 'expiresAt'])",
+        "board": {
+          ".validate": "newData.isString()"
+        },
+        "currentPlayer": {
+          ".validate": "newData.isString() && (newData.val() === 'white' || newData.val() === 'black')"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() === 'waiting' || newData.val() === 'playing' || newData.val() === 'completed' || newData.val() === 'finished' || newData.val() === 'rematch_requested' || newData.val() === 'rematch_accepted')"
+        },
+        "winner": {
+          ".validate": "newData.isString() && (newData.val() === 'white' || newData.val() === 'black')"
+        },
+        "whitePlayer": {
+          ".validate": "newData.isString() || newData.val() === null"
+        },
+        "blackPlayer": {
+          ".validate": "newData.isString() || newData.val() === null"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "lastMoveAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "gameCode": {
+          ".validate": "newData.isString()"
+        },
+        "expiresAt": {
+          ".validate": "newData.isNumber() && newData.val() > now"
+        }
+      }
+    }
+  }
+} 
