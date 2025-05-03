@@ -98,6 +98,9 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
   /** @description Flag indicating if the opponent has requested a rematch */
   opponentRematchRequested = false;
 
+  /** @description Flag indicating if waiting for opponent to accept rematch */
+  waitingForRematchAcceptance = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -221,21 +224,68 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.gameSubscription = this.onlineGameService.listenToGame(this.gameCode)
       .subscribe({
         next: (gameState: GameState | null) => {
+          const previousState = this.currentGameState;
           this.currentGameState = gameState;
+          
           if (gameState && this.board) {
-            this.board.setFEN(gameState.game.board);
-            if (!this.isWhitePlayer) {
-              setTimeout(() => {
-                this.board.reverse();
-              });
+            // Only reset the board when transitioning from rematch_requested to playing
+            const wasRematchRequested = previousState?.game.status === 'rematch_requested';
+            const isNowPlaying = gameState.game.status === 'playing';
+            
+            if (wasRematchRequested && isNowPlaying) {
+              this.board.reset();
+              if (!this.isWhitePlayer) {
+                setTimeout(() => {
+                  this.board.reverse();
+                });
+              }
+            } else {
+              this.board.setFEN(gameState.game.board);
+              if (!this.isWhitePlayer) {
+                setTimeout(() => {
+                  this.board.reverse();
+                });
+              }
             }
           }
 
-          // Show game over dialog for both players if game is completed
-          if (gameState && gameState.game.status === 'completed') {
-            this.gameEnded = true;
-            const winner = gameState.game.winner === 'white' ? 'White' : 'Black';
-            this.gameEndMessage = `Checkmate! ${winner} wins!`;
+          // Update rematch states
+          if (gameState) {
+            // Reset rematch states when game status changes to playing
+            if (gameState.game.status === 'playing') {
+              this.rematchRequested = false;
+              this.opponentRematchRequested = false;
+              this.waitingForRematchAcceptance = false;
+            }
+            
+            // Update rematch states based on game status
+            if (gameState.game.status === 'rematch_requested') {
+              // If I requested the rematch
+              if (this.rematchRequested) {
+                this.waitingForRematchAcceptance = true;
+                this.opponentRematchRequested = false;
+              } else {
+                // If opponent requested the rematch
+                this.opponentRematchRequested = true;
+                this.waitingForRematchAcceptance = false;
+              }
+            }
+            
+            // Game is considered ended if it's completed OR if a rematch is requested
+            this.gameEnded = gameState.game.status === 'completed' || gameState.game.status === 'rematch_requested';
+            
+            if (this.gameEnded) {
+              if (gameState.game.status === 'completed') {
+                const winner = gameState.game.winner === 'white' ? 'White' : 'Black';
+                this.gameEndMessage = `Checkmate! ${winner} wins!`;
+              } else if (gameState.game.status === 'rematch_requested') {
+                if (this.rematchRequested) {
+                  this.gameEndMessage = 'Game Over - Waiting for opponent to accept rematch';
+                } else {
+                  this.gameEndMessage = 'Game Over - Opponent requested a rematch';
+                }
+              }
+            }
           }
 
           this.cdr.detectChanges();
@@ -382,7 +432,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
    * Requests a rematch from the opponent.
    */
   requestRematch(): void {
-    if (!this.gameCode) return;
+    if (!this.gameCode || this.rematchRequested) return;
     this.rematchRequested = true;
     this.onlineGameService.requestRematch(this.gameCode);
   }
@@ -392,7 +442,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
    * Accepts a rematch request from the opponent.
    */
   acceptRematch(): void {
-    if (!this.gameCode) return;
+    if (!this.gameCode || !this.opponentRematchRequested) return;
     this.onlineGameService.acceptRematch(this.gameCode);
   }
 }

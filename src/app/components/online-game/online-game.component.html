@@ -93,11 +93,35 @@
           <mat-icon>refresh</mat-icon>
           Create New Game
         </button>
-        <button mat-raised-button color="accent" (click)="requestRematch()" class="rematch-button">
+        <button *ngIf="!rematchRequested && !opponentRematchRequested" 
+                mat-raised-button color="accent" 
+                (click)="requestRematch()" 
+                class="rematch-button">
           <mat-icon>replay</mat-icon>
           Request Rematch
         </button>
+        <button *ngIf="opponentRematchRequested" 
+                mat-raised-button color="accent" 
+                (click)="acceptRematch()" 
+                class="rematch-button">
+          <mat-icon>replay</mat-icon>
+          Accept Rematch
+        </button>
       </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div *ngIf="waitingForRematchAcceptance" class="rematch-waiting-overlay">
+    <mat-card class="rematch-waiting-card">
+      <mat-card-header>
+        <mat-card-title>Waiting for opponent to accept rematch</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="waiting-message">
+          <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+          <span>Waiting for opponent to accept rematch<span class="dot-animate">{{ animatedDots }}</span></span>
+        </div>
+      </mat-card-content>
     </mat-card>
   </div>
 </div>

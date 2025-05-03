@@ -269,7 +269,7 @@ export class OnlineGameService {
 
   /**
    * @description
-   * Accepts a rematch request and creates a new game.
+   * Accepts a rematch request and resets the current game.
    * @param {string} gameCode - The code of the game
    */
   async acceptRematch(gameCode: string): Promise<void> {
@@ -287,26 +287,17 @@ export class OnlineGameService {
     const [gameId, game] = gameEntry;
     const gameData = game as OnlineGame;
 
-    // Create a new game with the same players but swapped colors
-    const newGame: OnlineGame = {
-      id: '',
-      board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      currentPlayer: 'white',
-      status: 'playing',
-      whitePlayer: gameData.blackPlayer,
-      blackPlayer: gameData.whitePlayer,
-      createdAt: Date.now(),
-      lastMoveAt: Date.now(),
-      gameCode: this.generateGameCode()
-    };
-
-    const newGameRef = push(ref(this.db, 'games'));
-    await set(newGameRef, newGame);
-
-    // Update the old game status
+    // Reset the current game to initial state
     const updates: any = {
-      [`games/${gameId}/status`]: 'rematch_accepted'
+      [`games/${gameId}/board`]: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      [`games/${gameId}/currentPlayer`]: 'white',
+      [`games/${gameId}/status`]: 'playing',
+      [`games/${gameId}/lastMoveAt`]: Date.now()
     };
+
+    // Swap player colors for the rematch
+    updates[`games/${gameId}/whitePlayer`] = gameData.blackPlayer;
+    updates[`games/${gameId}/blackPlayer`] = gameData.whitePlayer;
 
     await update(ref(this.db), updates);
   }

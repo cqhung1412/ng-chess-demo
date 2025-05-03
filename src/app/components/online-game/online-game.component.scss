@@ -273,3 +273,41 @@
     transition: none !important;
   }
 }
+
+.rematch-waiting-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.rematch-waiting-card {
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  padding: 20px;
+}
+
+.rematch-waiting-card .waiting-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.rematch-waiting-card mat-progress-spinner {
+  margin-bottom: 16px;
+}
+
+.rematch-waiting-card .dot-animate {
+  display: inline-block;
+  width: 24px;
+  text-align: left;
+}
