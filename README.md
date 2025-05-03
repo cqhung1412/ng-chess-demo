@@ -2,6 +2,8 @@
 
 A modern web-based chess application built with Angular 16, featuring both local and online multiplayer capabilities. This project demonstrates the integration of Angular with Firebase for real-time game functionality.
 
+Demo link: https://ng-chess-demo.web.app
+
 ## Features
 
 - 🎮 Local chess gameplay
