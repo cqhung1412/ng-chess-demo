@@ -17,7 +17,16 @@
     <iframe #mobileBoard class="iframe-box iframe-mobile" src="/iframepage?mobile=true" title="Mobile Chess Board"></iframe>
   </div>
 
-  <app-continue-game-dialog *ngIf="showContinueDialog"></app-continue-game-dialog>
+  <div *ngIf="showContinueDialog" class="dialog-overlay" (click)="onNoClick()">
+    <div class="dialog-content" (click)="$event.stopPropagation()">
+      <h2>Continue Previous Game?</h2>
+      <p>We found a game in progress. Would you like to continue where you left off?</p>
+      <div class="dialog-actions">
+        <button (click)="onNoClick()">Start New Game</button>
+        <button (click)="onYesClick()" class="primary">Continue Game</button>
+      </div>
+    </div>
+  </div>
 
   <div *ngIf="gameEnded" class="game-end-overlay">
     <mat-card class="game-end-card">

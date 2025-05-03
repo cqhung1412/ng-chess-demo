@@ -8,7 +8,6 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChessMessageService } from '../../services/chess-message.service';
 import { GameStateService } from '../../services/game-state.service';
-import { ContinueGameDialogComponent } from '../continue-game-dialog/continue-game-dialog.component';
 import { MaterialModule } from '../../material.module';
 
 /**
@@ -31,7 +30,7 @@ import { MaterialModule } from '../../material.module';
 @Component({
   selector: 'app-offline-game',
   standalone: true,
-  imports: [CommonModule, RouterLink, ContinueGameDialogComponent, MaterialModule],
+  imports: [CommonModule, RouterLink, MaterialModule],
   templateUrl: './offline-game.component.html',
   styleUrls: ['./offline-game.component.scss']
 })
@@ -77,7 +76,6 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
     const savedState = this.gameStateService.loadGameState();
     if (savedState) {
       this.showContinueDialog = true;
-      window.addEventListener('continueGameChoice', this.handleContinueChoice);
     }
   }
 
@@ -86,19 +84,18 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
    * Cleans up event listeners when the component is destroyed.
    */
   ngOnDestroy() {
-    window.removeEventListener('continueGameChoice', this.handleContinueChoice);
+    // No need to remove event listeners as we're not using them anymore
   }
 
   /**
    * @description
    * Handles the user's choice to continue or start a new game.
-   * @param {Event} event - The continue game choice event
+   * @param {boolean} continueGame - Whether to continue the existing game
    */
-  private handleContinueChoice = (event: Event) => {
-    const customEvent = event as CustomEvent;
+  private handleContinueChoice(continueGame: boolean): void {
     this.ngZone.run(() => {
       this.showContinueDialog = false;
-      if (customEvent.detail) {
+      if (continueGame) {
         // User wants to continue the game
         const savedState = this.gameStateService.loadGameState();
         if (savedState) {
@@ -113,7 +110,23 @@ export class OfflineGameComponent implements AfterViewInit, OnInit, OnDestroy {
         this.reloadIframes();
       }
     });
-  };
+  }
+
+  /**
+   * @description
+   * Handles the "No" button click in the continue game dialog.
+   */
+  onNoClick(): void {
+    this.handleContinueChoice(false);
+  }
+
+  /**
+   * @description
+   * Handles the "Yes" button click in the continue game dialog.
+   */
+  onYesClick(): void {
+    this.handleContinueChoice(true);
+  }
 
   /**
    * @description
