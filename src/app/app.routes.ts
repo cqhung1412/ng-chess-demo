@@ -18,7 +18,6 @@ import { IframePageComponent } from './components/iframepage/iframepage.componen
  * - '/mainpage' -> MainPageComponent (Home page)
  * - '/offline' -> OfflineGameComponent (Local chess game)
  * - '/online' -> OnlineGameComponent (Online multiplayer game)
- * - '/online/:gameCode' -> OnlineGameComponent (Join specific online game)
  * - '/iframepage' -> IframePageComponent (Embedded game view)
  * 
  * @type {Routes}
@@ -28,6 +27,5 @@ export const routes: Routes = [
   { path: 'mainpage', component: MainPageComponent },
   { path: 'offline', component: OfflineGameComponent },
   { path: 'online', component: OnlineGameComponent },
-  { path: 'online/:gameCode', component: OnlineGameComponent },
   { path: 'iframepage', component: IframePageComponent }
 ];
