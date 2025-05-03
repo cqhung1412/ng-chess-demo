@@ -30,7 +30,7 @@ Before you begin, ensure you have the following installed:
 
 ## Installation
 
-1. Clone the repository:
+1. Fork and clone the repository:
 ```bash
 git clone https://github.com/yourusername/ng-chess-demo.git
 cd ng-chess-demo
@@ -38,7 +38,7 @@ cd ng-chess-demo
 
 2. Install dependencies:
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
 3. Configure Firebase:
@@ -97,7 +97,6 @@ During initialization, select the following options:
 ### 4. Configure Firebase Environment
 1. Create a new Firebase project in the [Firebase Console](https://console.firebase.google.com/)
 2. Enable the following Firebase services:
-   - Authentication
    - Firebase Realtime Database
    - Hosting
 
@@ -117,24 +116,10 @@ During initialization, select the following options:
      }
    };
    ```
-   - Repeat the same configuration in `src/environments/environment.prod.ts` for production
 
 ### 5. Security Rules Setup
-1. Configure Firestore security rules in the Firebase Console:
-   ```javascript
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /games/{gameId} {
-         allow read, write: if request.auth != null;
-       }
-     }
-   }
-   ```
 
-2. Configure Authentication settings:
-   - Enable Email/Password authentication in the Firebase Console
-   - Add your domain to the authorized domains list
+Configure Firebase realtime database security rules in the Firebase Console with [this example](./src/environments/database.rules.json)
 
 ## Deployment
 
@@ -163,16 +148,8 @@ src/
 │   ├── services/       # Application services
 │   └── app.module.ts   # Root module
 ├── environments/       # Environment configurations
-└── styles.scss        # Global styles
+└── styles.scss         # Global styles
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 

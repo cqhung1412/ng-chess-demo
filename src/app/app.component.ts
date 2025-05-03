@@ -33,5 +33,5 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   /** @description The title of the application */
-  title = 'ng-chess-demo';
+  title = 'Angular Chess Demo';
 }
