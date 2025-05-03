@@ -34,7 +34,8 @@ describe('OnlineGameComponent', () => {
       blackPlayer: 'Player2',
       createdAt: Date.now(),
       lastMoveAt: Date.now(),
-      gameCode: 'TEST123'
+      gameCode: 'TEST123',
+      expiresAt: Date.now() + (60 * 60 * 1000) // 1 hour from now
     },
     players: {
       white: {

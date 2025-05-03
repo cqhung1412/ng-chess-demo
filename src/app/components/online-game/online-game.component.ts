@@ -416,6 +416,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
   }
 
   /**
+   * @deprecated
    * @description
    * Resets the game state and creates a new game.
    */

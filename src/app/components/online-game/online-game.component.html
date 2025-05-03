@@ -89,10 +89,10 @@
         <mat-card-title>{{ gameEndMessage }}</mat-card-title>
       </mat-card-header>
       <mat-card-actions>
-        <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
+        <!-- <button mat-raised-button color="primary" (click)="resetGame()" class="new-game-button">
           <mat-icon>refresh</mat-icon>
           Create New Game
-        </button>
+        </button> -->
         <button *ngIf="!rematchRequested && !opponentRematchRequested" 
                 mat-raised-button color="accent" 
                 (click)="requestRematch()" 
