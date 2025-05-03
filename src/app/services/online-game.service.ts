@@ -4,7 +4,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Database, ref, set, get, onValue, push, update, remove, DataSnapshot } from '@angular/fire/database';
+import { Database, ref, set, get, onValue, push, update, remove, DataSnapshot, query, orderByChild, equalTo, limitToFirst } from '@angular/fire/database';
 import { BehaviorSubject, Observable, from, map } from 'rxjs';
 import { OnlineGame, GameState, GameMove, GamePlayer, GameStatus, PlayerColor } from '../models/online-game.model';
 
@@ -55,6 +55,7 @@ export class OnlineGameService {
   async createGame(playerName: string): Promise<string> {
     const gameCode = this.generateGameCode();
     const gameId = push(ref(this.db, 'games')).key;
+    const now = Date.now();
     const newGame: OnlineGame = {
       id: gameId!,
       board: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', // Initial chess position
@@ -62,9 +63,10 @@ export class OnlineGameService {
       status: 'waiting',
       whitePlayer: playerName,
       blackPlayer: null,
-      createdAt: Date.now(),
-      lastMoveAt: Date.now(),
-      gameCode
+      createdAt: now,
+      lastMoveAt: now,
+      gameCode,
+      expiresAt: now + (60 * 60 * 1000) // 1 hour from now
     };
 
     await set(ref(this.db, `games/${gameId}`), newGame);
@@ -85,7 +87,9 @@ export class OnlineGameService {
 
     const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
       const gameData = game as OnlineGame;
-      return gameData.gameCode === gameCode && gameData.status === 'waiting';
+      return gameData.gameCode === gameCode && 
+             gameData.status === 'waiting' && 
+             gameData.expiresAt > Date.now(); // Only join active games
     });
 
     if (!gameEntry) {
@@ -115,43 +119,43 @@ export class OnlineGameService {
    */
   listenToGame(gameCode: string): Observable<GameState | null> {
     const gamesRef = ref(this.db, 'games');
-    console.log('Setting up onValue listener for /games');
+    const gameQuery = query(gamesRef, orderByChild('gameCode'), equalTo(gameCode), limitToFirst(1));
+    
     return new Observable(subscriber => {
-      onValue(gamesRef, (snapshot: DataSnapshot) => {
-        console.log('onValue callback triggered');
-        const games = snapshot.val() || {};
-        console.log('Looking for gameCode:', gameCode);
-        console.log('Available games:', Object.values(games).map((g: any) => g.gameCode));
-        const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
-          const gameData = game as OnlineGame;
-          return gameData.gameCode === gameCode;
-        });
-
-        if (gameEntry) {
-          const [gameId, game] = gameEntry;
-          const gameData = game as OnlineGame;
-          const gameState: GameState = {
-            game: gameData,
-            players: {
-              white: gameData.whitePlayer ? { 
-                id: gameData.whitePlayer, 
-                name: gameData.whitePlayer, 
-                color: 'white', 
-                isReady: true 
-              } : null,
-              black: gameData.blackPlayer ? { 
-                id: gameData.blackPlayer, 
-                name: gameData.blackPlayer, 
-                color: 'black', 
-                isReady: true 
-              } : null
-            },
-            moves: []
-          };
-          subscriber.next(gameState);
-        } else {
+      onValue(gameQuery, (snapshot: DataSnapshot) => {
+        if (!snapshot.exists()) {
           subscriber.next(null);
+          return;
         }
+
+        const gameId = Object.keys(snapshot.val())[0];
+        const gameData = snapshot.val()[gameId] as OnlineGame;
+
+        // Check if game is expired
+        if (gameData.expiresAt <= Date.now()) {
+          subscriber.next(null);
+          return;
+        }
+
+        const gameState: GameState = {
+          game: gameData,
+          players: {
+            white: gameData.whitePlayer ? { 
+              id: gameData.whitePlayer, 
+              name: gameData.whitePlayer, 
+              color: 'white', 
+              isReady: true 
+            } : null,
+            black: gameData.blackPlayer ? { 
+              id: gameData.blackPlayer, 
+              name: gameData.blackPlayer, 
+              color: 'black', 
+              isReady: true 
+            } : null
+          },
+          moves: []
+        };
+        subscriber.next(gameState);
       });
     });
   }
@@ -165,29 +169,27 @@ export class OnlineGameService {
    * @returns {Promise<boolean>} A promise that resolves to true if the move was successful
    */
   async makeMove(gameCode: string, move: GameMove, newFEN: string): Promise<boolean> {
+    // First, get the game ID using the indexed gameCode
     const gamesRef = ref(this.db, 'games');
-    const snapshot = await get(gamesRef);
-    const games = snapshot.val() || {};
-
-    const gameEntry = Object.entries(games).find(([_, game]: [string, any]) => {
-      const gameData = game as OnlineGame;
-      return gameData.gameCode === gameCode;
-    });
-
-    if (!gameEntry) {
+    const gameQuery = query(gamesRef, orderByChild('gameCode'), equalTo(gameCode), limitToFirst(1));
+    const snapshot = await get(gameQuery);
+    
+    if (!snapshot.exists()) {
       return false;
     }
 
-    const [gameId, game] = gameEntry;
-    const gameData = game as OnlineGame;
+    const gameId = Object.keys(snapshot.val())[0];
+    const gameData = snapshot.val()[gameId] as OnlineGame;
+
     if (gameData.status !== 'playing' || gameData.currentPlayer !== move.color) {
       return false;
     }
 
     const updates: any = {
-      [`games/${gameId}/board`]: newFEN, // Use the new FEN string
+      [`games/${gameId}/board`]: newFEN,
       [`games/${gameId}/currentPlayer`]: move.color === 'white' ? 'black' : 'white',
-      [`games/${gameId}/lastMoveAt`]: Date.now()
+      [`games/${gameId}/lastMoveAt`]: Date.now(),
+      [`games/${gameId}/expiresAt`]: Date.now() + (60 * 60 * 1000) // Extend expiration by 1 hour
     };
 
     await update(ref(this.db), updates);

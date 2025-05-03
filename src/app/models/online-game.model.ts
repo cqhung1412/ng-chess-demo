@@ -12,6 +12,7 @@ export interface OnlineGame {
   lastMoveAt: number;
   winner?: PlayerColor;
   gameCode: string;
+  expiresAt: number;
 }
 
 export interface GameMove {

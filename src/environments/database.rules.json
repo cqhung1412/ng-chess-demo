@@ -3,10 +3,11 @@
     "games": {
       ".read": true,
       ".write": true,
+      ".indexOn": ["gameCode"],
       "$gameId": {
-        ".read": true,
+        ".read": "(data.hasChild('expiresAt') && now > data.child('expiresAt').val())",
         ".write": true,
-        ".validate": "newData.hasChildren(['board', 'currentPlayer', 'status'])",
+        ".validate": "newData.hasChildren(['board', 'gameCode', 'expiresAt'])",
         "board": {
           ".validate": "newData.isString()"
         },
@@ -20,10 +21,22 @@
           ".validate": "newData.isString() && (newData.val() === 'white' || newData.val() === 'black')"
         },
         "whitePlayer": {
-          ".validate": "newData.isString()"
+          ".validate": "newData.isString() || newData.val() === null"
         },
         "blackPlayer": {
+          ".validate": "newData.isString() || newData.val() === null"
+        },
+        "createdAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "lastMoveAt": {
+          ".validate": "newData.isNumber()"
+        },
+        "gameCode": {
           ".validate": "newData.isString()"
+        },
+        "expiresAt": {
+          ".validate": "newData.isNumber() && newData.val() > now"
         }
       }
     }
