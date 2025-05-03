@@ -271,7 +271,18 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
     }
 
     const newFEN = this.board.getFEN();
-    console.log('Making move:', move, 'New FEN:', newFEN);
+    const moveHistory = this.board.getMoveHistory();
+    const lastMove = moveHistory[moveHistory.length - 1];
+
+    // Log game state
+    console.log('Game State:', {
+      moves: moveHistory,
+      lastMove: {
+        ...lastMove,
+        check: move.check,
+        mate: move.mate
+      }
+    });
 
     const gameMove: GameMove = {
       from: move.from,
@@ -363,7 +374,7 @@ export class OnlineGameComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.gameEndMessage = '';
     this.rematchRequested = false;
     this.opponentRematchRequested = false;
-    this.router.navigate(['/online-game']);
+    this.router.navigate(['/online']);
   }
 
   /**
